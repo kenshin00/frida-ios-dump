@@ -1,5 +1,5 @@
 # frida-ios-dump
-pull decrypted ipa from jailbreak device
+dump decrypted ipa from jailbroken devices
 
 ### Usage
 
@@ -9,7 +9,6 @@ pull decrypted ipa from jailbreak device
 
 ## 3. ./dump.py bundle_id_or_app_name proc_name
 
-
-congratulations!!! You've got a decrypted ipa file.
+## 4. use frida-ps to find proc_name
 
 Drag to [MonkeyDev](https://github.com/AloneMonkey/MonkeyDev), Happy hacking!
