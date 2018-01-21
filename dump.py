@@ -10,6 +10,7 @@ import frida
 import threading
 import os
 import shutil
+import time
 
 DUMP_JS = './dump.js'
 APP_JS = './app.js'
@@ -129,6 +130,7 @@ def main(target, pname):
     session.detach()
     createDir(os.getcwd() + "/" + OUTPUT)
     print("start dump target app......")
+    time.sleep(2)
     session = device.attach(pname)
     script = loadJsFile(session, DUMP_JS)
     script.post("dump")
@@ -149,5 +151,5 @@ if __name__ == "__main__":
             if session:
                 session.detach()
             sys.exit()
-        except:
-            pass
+        except Exception as e:
+            print(e)
