@@ -5,9 +5,9 @@ dump decrypted ipa from jailbroken devices
 
 ## 1. install [frida](http://www.frida.re/) on device and mac
 
-## 2. iproxy 2222 2222
+## 2. ./frida-server-12.1.2-ios-arm64  -l a.b.c.d
 
-## 3. ./dump.py bundle_id_or_app_name proc_name
+## 3. ./dump.py bundle_id_or_app_name proc_name ip_of_ios
 
 ## 4. use frida-ps to find proc_name
 

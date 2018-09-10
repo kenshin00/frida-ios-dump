@@ -19,12 +19,18 @@ file_dict = {}
 
 opened = threading.Event()
 finished = threading.Event()
+frida_host = None
 
 global session
 
 
 def get_usb_iphone():
-    dManager = frida.get_device_manager();
+    global frida_host
+    if len(sys.argv) >= 4:
+        frida_host = sys.argv[3]
+    dManager = frida.get_device_manager()
+    if frida_host is not None:
+        dManager.add_remote_device(frida_host)
     changed = threading.Event()
 
     def on_changed():
@@ -33,8 +39,9 @@ def get_usb_iphone():
     dManager.on('changed', on_changed)
 
     device = None
+    print(dManager.enumerate_devices())
     while device is None:
-        devices = [dev for dev in dManager.enumerate_devices() if dev.type == 'tether']
+        devices = [dev for dev in dManager.enumerate_devices() if (dev.name == frida_host) or (dev.type == 'usb' and frida_host is None)]
         if len(devices) == 0:
             print('Waiting for usb device...')
             changed.wait()
@@ -69,18 +76,14 @@ def on_message(message, data):
         if "dump" in payload:
             orign_path = payload["path"]
             dumppath = payload["dump"]
-            os.system(
-                u''.join(("scp -P 2222 root@localhost:", dumppath, u" ./" + OUTPUT + u"/")).encode('utf-8').strip())
-            os.system(
-                u''.join(("chmod 655 ", u'./' + OUTPUT + u'/', os.path.basename(dumppath))).encode('utf-8').strip())
+            os.system(u''.join(("scp -P 2222 root@%s:" % frida_host, dumppath, u" ./" + OUTPUT + u"/")).encode('utf-8').strip())
+            os.system(u''.join(("chmod 655 ", u'./' + OUTPUT + u'/', os.path.basename(dumppath))).encode('utf-8').strip())
             index = orign_path.find(".app/")
             file_dict[os.path.basename(dumppath)] = orign_path[index + 5:]
         if "app" in payload:
             apppath = payload["app"]
-            os.system(
-                u''.join(("scp -r -P 2222 root@localhost:", apppath, u" ./" + OUTPUT + u"/")).encode('utf-8').strip())
-            os.system(
-                u''.join(("chmod 755 ", u'./' + OUTPUT + u'/', os.path.basename(apppath))).encode('utf-8').strip())
+            os.system(u''.join(("scp -r -P 2222 root@%s:" % frida_host, apppath, u" ./" + OUTPUT + u"/")).encode('utf-8').strip())
+            os.system(u''.join(("chmod 755 ", u'./' + OUTPUT + u'/', os.path.basename(apppath))).encode('utf-8').strip())
             file_dict["app"] = os.path.basename(apppath)
         if "done" in payload:
             gen_ipa(os.getcwd() + "/" + OUTPUT)
